@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>qzytwway的博客</title>
+    <link>https://qzytwway.github.io/</link>
+    <description>Recent content on qzytwway的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 16 Jul 2022 22:33:30 +0800</lastBuildDate><atom:link href="https://qzytwway.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>后端数据持久化</title>
+      <link>https://qzytwway.github.io/post/%E5%90%8E%E7%AB%AF%E6%95%B0%E6%8D%AE%E6%8C%81%E4%B9%85%E5%8C%96/</link>
+      <pubDate>Sat, 16 Jul 2022 22:33:30 +0800</pubDate>
+      
+      <guid>https://qzytwway.github.io/post/%E5%90%8E%E7%AB%AF%E6%95%B0%E6%8D%AE%E6%8C%81%E4%B9%85%E5%8C%96/</guid>
+      <description>一.nfs部署 1.安装nfs服务 #在所有机器上安装 yum install -y nfs-utils #在nfs服务节点上 echo &amp;#34;/nfs/data/ *(insecure,rw,sync,no_root_squash)&amp;#34; &amp;gt; /etc/exports mkdir -p /nfs/data systemctl enable rpcbind --now systemctl enable nfs-server --now #配置生效 exportfs -r showmount -e 192.168.50.71 #测试使用nfs服务作为持久化存储创建一次部署 apiVersion: apps/v1 kind: Deployment metadata: labels: app: nginx-pv-demo name: nginx-pv-demo spec: replicas: 2 selector: matchLabels: app: nginx-pv-demo template: metadata: labels: app: nginx-pv-demo spec: containers: - image: nginx name: nginx volumeMounts: - name: html mountPath: /usr/share/nginx/html volumes: - name: html nfs: server: 192.</description>
+    </item>
+    
+  </channel>
+</rss>

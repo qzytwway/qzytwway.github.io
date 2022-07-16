@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <title>后端数据持久化 // qzytwway的博客</title>
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hugo 0.101.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="John Doe" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="https://qzytwway.github.io/css/main.min.88e7083eff65effb7485b6e6f38d10afbec25093a6fac42d734ce9024d3defbd.css" />
+
+    
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="后端数据持久化"/>
+<meta name="twitter:description" content="一.nfs部署 1.安装nfs服务 #在所有机器上安装 yum install -y nfs-utils #在nfs服务节点上 echo &#34;/nfs/data/ *(insecure,rw,sync,no_root_squash)&#34; &gt; /etc/exports mkdir -p /nfs/data systemctl enable rpcbind --now systemctl enable nfs-server --now #配置生效 exportfs -r showmount -e 192.168.50.71 #测试使用nfs服务作为持久化存储创建一次部署 apiVersion: apps/v1 kind: Deployment metadata: labels: app: nginx-pv-demo name: nginx-pv-demo spec: replicas: 2 selector: matchLabels: app: nginx-pv-demo template: metadata: labels: app: nginx-pv-demo spec: containers: - image: nginx name: nginx volumeMounts: - name: html mountPath: /usr/share/nginx/html volumes: - name: html nfs: server: 192."/>
+
+    <meta property="og:title" content="后端数据持久化" />
+<meta property="og:description" content="一.nfs部署 1.安装nfs服务 #在所有机器上安装 yum install -y nfs-utils #在nfs服务节点上 echo &#34;/nfs/data/ *(insecure,rw,sync,no_root_squash)&#34; &gt; /etc/exports mkdir -p /nfs/data systemctl enable rpcbind --now systemctl enable nfs-server --now #配置生效 exportfs -r showmount -e 192.168.50.71 #测试使用nfs服务作为持久化存储创建一次部署 apiVersion: apps/v1 kind: Deployment metadata: labels: app: nginx-pv-demo name: nginx-pv-demo spec: replicas: 2 selector: matchLabels: app: nginx-pv-demo template: metadata: labels: app: nginx-pv-demo spec: containers: - image: nginx name: nginx volumeMounts: - name: html mountPath: /usr/share/nginx/html volumes: - name: html nfs: server: 192." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://qzytwway.github.io/post/%E5%90%8E%E7%AB%AF%E6%95%B0%E6%8D%AE%E6%8C%81%E4%B9%85%E5%8C%96/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2022-07-16T22:33:30+08:00" />
+<meta property="article:modified_time" content="2022-07-16T22:33:30+08:00" />
+
+
+
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="https://qzytwway.github.io/"><img class="app-header-avatar" src="/head.jpg" alt="John Doe" /></a>
+      <h1>qzytwway的博客</h1>
+      <p>有幸相遇，恰好合拍</p>
+    </header>
+    <main class="app-container">
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class ="post-title">后端数据持久化</h1>
+      <div class="post-meta">
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
+  <title>calendar</title>
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+</svg>
+          Jul 16, 2022
+        </div>
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock">
+  <title>clock</title>
+  <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+          3 min read
+        </div>
+      </div>
+    </header>
+    <div class="post-content">
+      <h1 id="一nfs部署">一.nfs部署</h1>
+<h2 id="1安装nfs服务">1.安装nfs服务</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#在所有机器上安装</span>
+</span></span><span style="display:flex;"><span>yum install -y nfs-utils
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#在nfs服务节点上</span>
+</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;/nfs/data/ *(insecure,rw,sync,no_root_squash)&#34;</span> &gt; /etc/exports
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>mkdir -p /nfs/data
+</span></span><span style="display:flex;"><span>systemctl enable rpcbind --now
+</span></span><span style="display:flex;"><span>systemctl enable nfs-server --now
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#配置生效</span>
+</span></span><span style="display:flex;"><span>exportfs -r
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>showmount -e 192.168.50.71
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#测试使用nfs服务作为持久化存储创建一次部署</span>
+</span></span><span style="display:flex;"><span>apiVersion: apps/v1
+</span></span><span style="display:flex;"><span>kind: Deployment
+</span></span><span style="display:flex;"><span>metadata:
+</span></span><span style="display:flex;"><span>  labels:
+</span></span><span style="display:flex;"><span>    app: nginx-pv-demo
+</span></span><span style="display:flex;"><span>  name: nginx-pv-demo
+</span></span><span style="display:flex;"><span>spec:
+</span></span><span style="display:flex;"><span>  replicas: <span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>  selector:
+</span></span><span style="display:flex;"><span>    matchLabels:
+</span></span><span style="display:flex;"><span>      app: nginx-pv-demo
+</span></span><span style="display:flex;"><span>  template:
+</span></span><span style="display:flex;"><span>    metadata:
+</span></span><span style="display:flex;"><span>      labels:
+</span></span><span style="display:flex;"><span>        app: nginx-pv-demo
+</span></span><span style="display:flex;"><span>    spec:
+</span></span><span style="display:flex;"><span>      containers:
+</span></span><span style="display:flex;"><span>      - image: nginx
+</span></span><span style="display:flex;"><span>        name: nginx
+</span></span><span style="display:flex;"><span>        volumeMounts:
+</span></span><span style="display:flex;"><span>        - name: html
+</span></span><span style="display:flex;"><span>          mountPath: /usr/share/nginx/html
+</span></span><span style="display:flex;"><span>      volumes:
+</span></span><span style="display:flex;"><span>        - name: html
+</span></span><span style="display:flex;"><span>          nfs:
+</span></span><span style="display:flex;"><span>            server: 192.168.50.71     <span style="color:#75715e">#nfs服务器地址</span>
+</span></span><span style="display:flex;"><span>            path: /nfs/data/nginx-pv
+</span></span></code></pre></div><h2 id="2创建pv">2.创建pv</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e">#nfs主节点</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">mkdir -p /nfs/data/01</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">mkdir -p /nfs/data/02</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">mkdir -p /nfs/data/03</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">PersistentVolume</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">pv01-10m</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">capacity</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">storage</span>: <span style="color:#ae81ff">10M</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">accessModes</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#ae81ff">ReadWriteMany</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">storageClassName</span>: <span style="color:#ae81ff">nfs</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">nfs</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">path</span>: <span style="color:#ae81ff">/nfs/data/01</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">server</span>: <span style="color:#ae81ff">192.168.50.71</span>
+</span></span><span style="display:flex;"><span>---
+</span></span><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">PersistentVolume</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">pv02-1gi</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">capacity</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">storage</span>: <span style="color:#ae81ff">1Gi</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">accessModes</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#ae81ff">ReadWriteMany</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">storageClassName</span>: <span style="color:#ae81ff">nfs</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">nfs</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">path</span>: <span style="color:#ae81ff">/nfs/data/02</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">server</span>: <span style="color:#ae81ff">192.168.50.71</span>
+</span></span><span style="display:flex;"><span>---
+</span></span><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">PersistentVolume</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">pv03-3gi</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">capacity</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">storage</span>: <span style="color:#ae81ff">3Gi</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">accessModes</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#ae81ff">ReadWriteMany</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">storageClassName</span>: <span style="color:#ae81ff">nfs</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">nfs</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">path</span>: <span style="color:#ae81ff">/nfs/data/03</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">server</span>: <span style="color:#ae81ff">192.168.50.71</span>
+</span></span></code></pre></div><h2 id="3创建一个部署并且使用pvc声明">3.创建一个部署并且使用pvc声明</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">apps/v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Deployment</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">labels</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">app</span>: <span style="color:#ae81ff">nginx-deploy-pvc</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">nginx-deploy-pvc</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">replicas</span>: <span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">selector</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">matchLabels</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">app</span>: <span style="color:#ae81ff">nginx-deploy-pvc</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">template</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">labels</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">app</span>: <span style="color:#ae81ff">nginx-deploy-pvc</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">containers</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">image</span>: <span style="color:#ae81ff">nginx:1.21-alpine</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">name</span>: <span style="color:#ae81ff">nginx</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">volumeMounts</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">html</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">mountPath</span>: <span style="color:#ae81ff">/usr/share/nginx/html</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">volumes</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">html</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">persistentVolumeClaim</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">claimName</span>: <span style="color:#ae81ff">nginx-pvc</span>
+</span></span><span style="display:flex;"><span>---
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">PersistentVolumeClaim</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">nginx-pvc</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">accessModes</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#ae81ff">ReadWriteMany</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">resources</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">requests</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">storage</span>: <span style="color:#ae81ff">200Mi</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">storageClassName</span>: <span style="color:#ae81ff">nfs</span>
+</span></span></code></pre></div><h2 id="4创建动态sc并测试pod">4.创建动态sc并测试pod</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>helm repo add moikot https://moikot.github.io/helm-charts
+</span></span><span style="display:flex;"><span>helm repo update
+</span></span><span style="display:flex;"><span>helm install nfs-storage --set storageClass.name<span style="color:#f92672">=</span>nfs-storage --set nfs.server<span style="color:#f92672">=</span>192.168.50.71 --set nfs.path<span style="color:#f92672">=</span>/nfs/data moikot/nfs-client-provisioner --version 1.3.0 -n provisioner --create-namespace
+</span></span></code></pre></div><p>如果遇到pvc一直pending的情况，先查看provisioner的log，大概率是selflink的问题，通过下面命令查看日志</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span>[<span style="color:#ae81ff">root@master1 ~]# kubectl logs nfs-client-provisioner-5499445f5b-h278g -n nfsstorage</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#编辑文件，加上下图这一条</span>
+</span></span><span style="display:flex;"><span>vim /etc/kubernetes/manifests/kube-apiserver.yaml
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>- --feature-gates<span style="color:#f92672">=</span>RemoveSelfLink<span style="color:#f92672">=</span>false
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>kubectl apply -f /etc/kubernetes/manifests/kube-apiserver.yaml
+</span></span></code></pre></div><h1 id="二heketi管理glusterfs">二.heketi管理glusterfs</h1>
+<h2 id="1安装heketi创建heketi集群">1.安装heketi，创建heketi集群</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>主机规划
+</span></span><span style="display:flex;"><span>192.168.50.71 master，
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>192.168.50.72 node1
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>192.168.50.73 node2
+</span></span></code></pre></div><h3 id="11添加gluster源所有主机">1.1添加gluster源，所有主机</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>yum install centos-release-gluster -y
+</span></span></code></pre></div><h3 id="12node1和node2安装glusterfs-server包作为服务器同时开启glusterd服务">1.2node1和node2安装glusterfs-server包作为服务器,同时开启glusterd服务</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>yum install glusterfs-server -y
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>systemctl enable --now glusterd
+</span></span></code></pre></div><h3 id="13在master管理节点上下载heketi服务以及heketi客户端管理包">1.3在master管理节点上下载heketi服务以及heketi客户端管理包</h3>
+<pre tabindex="0"><code class="language-she" data-lang="she">yum install -y heketi heketi-client
+</code></pre><h3 id="14创建heketi的ssh加密密钥同时传送到node1和node2">1.4创建heketi的ssh加密密钥，同时传送到node1和node2</h3>
+<pre tabindex="0"><code class="language-she" data-lang="she">ssh-keygen -t rsa -f /etc/heketi/heketi_key -N &#34;&#34;
+
+ssh-copy-id -i /etc/heketi/heketi_key [root@192.168.50.72](http://root@192.168.50.72/)
+
+ssh-copy-id -i /etc/heketi/heketi_key [root@192.168.50.73](http://root@192.168.50.73/)
+</code></pre><h3 id="15修改heketi的配置文件需要改的地方如下图">1.5修改heketi的配置文件，需要改的地方如下图</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>vim /etc/heketi/heketi.json
+</span></span></code></pre></div><p><img src="https://raw.githubusercontent.com/KKolone/img/main/img202205071440298.png" alt="202205071440298"></p>
+<h3 id="16赋予权限">1.6赋予权限</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#f92672">[</span>root@master ~<span style="color:#f92672">]</span><span style="color:#75715e"># chown -R heketi:heketi /etc/heketi/</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>root@master ~<span style="color:#f92672">]</span><span style="color:#75715e"># chown -R heketi:heketi /var/lib/heketi</span>
+</span></span></code></pre></div><h3 id="17启动heketi服务">1.7启动heketi服务</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#f92672">[</span>root@master ~<span style="color:#f92672">]</span><span style="color:#75715e"># systemctl daemon-reload</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>root@master ~<span style="color:#f92672">]</span><span style="color:#75715e"># systemctl enable --now heketi</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>root@master ~<span style="color:#f92672">]</span><span style="color:#75715e"># curl 127.0.0.1:8080/hello</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Hello from Heketi<span style="color:#f92672">[</span>root@master ~<span style="color:#f92672">]</span><span style="color:#75715e">#</span>
+</span></span></code></pre></div><h3 id="18创建变量易于操作">1.8创建变量，易于操作</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#f92672">[</span>root@master ~<span style="color:#f92672">]</span><span style="color:#75715e"># export HEKETI_CLI_USER=admin</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>root@master ~<span style="color:#f92672">]</span><span style="color:#75715e"># export HEKETI_CLI_KEY=admin@123</span>
+</span></span></code></pre></div><h2 id="2操作heketi-cli创建集群">2.操作heketi-cli创建集群</h2>
+<h3 id="21创建一个cluster集群">2.1创建一个cluster集群</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#f92672">[</span>root@master ~<span style="color:#f92672">]</span><span style="color:#75715e"># heketi-cli cluster list</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Clusters:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>root@master ~<span style="color:#f92672">]</span><span style="color:#75715e"># heketi-cli cluster create</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Cluster id: b7f3457d370de5a798bf1a0da6de1cd1
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>root@master ~<span style="color:#f92672">]</span><span style="color:#75715e"># heketi-cli cluster list</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Clusters:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Id:b7f3457d370de5a798bf1a0da6de1cd1 <span style="color:#f92672">[</span>file<span style="color:#f92672">][</span>block<span style="color:#f92672">]</span>
+</span></span></code></pre></div><h3 id="22把node1和node2加入其中">2.2把node1和node2加入其中</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#f92672">[</span>root@master ~<span style="color:#f92672">]</span><span style="color:#75715e"># heketi-cli node add --zone 1 --cluster b7f3457d370de5a798bf1a0da6de1cd1 --management-host-name node1 --storage-host-name 192.168.50.72</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Node information:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Id: 0e99fee20e24204bf4519e542725e3da
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>State: online
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Cluster Id: b7f3457d370de5a798bf1a0da6de1cd1
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Zone: <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Management Hostname node1
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Storage Hostname 192.168.50.72
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>root@master ~<span style="color:#f92672">]</span><span style="color:#75715e"># heketi-cli node add --zone 1 --cluster b7f3457d370de5a798bf1a0da6de1cd1 --management-host-name node2 --storage-host-name 192.168.50.73</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Node information:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Id: b0b91b75016670b4466efe48f8ba37c5
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>State: online
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Cluster Id: b7f3457d370de5a798bf1a0da6de1cd1
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Zone: <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Management Hostname node2
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Storage Hostname 192.168.50.73
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>root@master ~<span style="color:#f92672">]</span><span style="color:#75715e"># heketi-cli node list</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Id:0e99fee20e24204bf4519e542725e3da     Cluster:b7f3457d370de5a798bf1a0da6de1cd1
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Id:b0b91b75016670b4466efe48f8ba37c5     Cluster:b7f3457d370de5a798bf1a0da6de1cd1
+</span></span></code></pre></div><h3 id="23添加硬盘到集群">2.3添加硬盘到集群</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#f92672">[</span>root@master ~<span style="color:#f92672">]</span><span style="color:#75715e"># heketi-cli device add --name=/dev/sdb --node=0e99fee20e24204bf4519e542725e3da</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Device added successfully
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>root@master ~<span style="color:#f92672">]</span><span style="color:#75715e"># heketi-cli device add --name=/dev/sdb --node=b0b91b75016670b4466efe48f8ba37c5</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Device added successfully
+</span></span></code></pre></div><h2 id="3使用k8s创建默认存储类型以及创建pvc">3.使用k8s创建默认存储类型以及创建pvc</h2>
+<h3 id="创建sc并应用">创建sc并应用</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#f92672">[</span>root@master glusterfs-provisioner<span style="color:#f92672">]</span><span style="color:#75715e"># cat storage-class-glusterfs.yaml</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>apiVersion: <span style="color:#f92672">[</span>storage.k8s.io/v1<span style="color:#f92672">](</span>http://storage.k8s.io/v1<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>kind: StorageClass
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>metadata:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>name: glusterfs
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>annotations:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>storageclass.beta.kubernetes.io/is-default-class:<span style="color:#f92672">](</span>http://storageclass.beta.kubernetes.io/is-default-class:<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;true&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>provisioner: <span style="color:#f92672">[</span>kubernetes.io/glusterfs<span style="color:#f92672">](</span>http://kubernetes.io/glusterfs<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>parameters:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>resturl: <span style="color:#e6db74">&#34;http://192.168.50.71:8080&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>restuser: <span style="color:#e6db74">&#34;admin&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>restuserkey: <span style="color:#e6db74">&#34;admin@123&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>volumetype: <span style="color:#e6db74">&#34;replicate:2&#34;</span>
+</span></span></code></pre></div><p>如使用sc创建动态存储无需操作上面的使用heketi手动创建集群步骤，可以参考下面连接来操作，sc的yaml文件可以参考上方。</p>
+<p><a href="https://www.cnblogs.com/minseo/p/12575604.html">https://www.cnblogs.com/minseo/p/12575604.html</a></p>
+
+    </div>
+    <div class="post-footer">
+      
+    </div>
+  </article>
+
+    </main>
+  </body>
+</html>
